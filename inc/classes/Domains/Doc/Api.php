@@ -96,7 +96,6 @@ final class Api extends ApiBase {
 	 *
 	 * @return array<string, mixed>
 	 * @throws \Exception 上傳失敗
-	 * @phpstan-ignore-next-line
 	 */
 	public static function extra_file_upload( array $body_params, \WP_REST_Request $request ): array {
 		$image_names = [ 'bg_images' ];

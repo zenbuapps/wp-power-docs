@@ -1,7 +1,9 @@
 <?php
 
 
-@[
+$args = $args ?? [];
+/** @var array{toc_html: string} $args */
+[
 	'toc_html' => $toc_html,
 ] = $args;
 
@@ -11,7 +13,7 @@ if (!$toc_html) {
 
 echo '<div class="sticky top-8">';
 echo '<p class="text-base text-base-content font-bold mb-2">大綱：</p>';
-echo $toc_html ?? '';
+echo $toc_html;
 echo '</div>';
 
 ?>

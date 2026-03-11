@@ -5,7 +5,7 @@
 
 global $post;
 
-use J7\Powerhouse\Domains\Post\Utils as PostUtils;
+use J7\Powerhouse\Domains\Post\Utils\CRUD as PostUtils;
 use J7\PowerDocs\Domains\Doc\Utils;
 
 $top_parent_id = PostUtils::get_top_post_id($post->ID);

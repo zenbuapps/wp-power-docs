@@ -3,7 +3,9 @@
  * 手機板 Sider 出現的選單
  */
 
-@[
+$args = $args ?? [];
+/** @var array{toc_html: string} $args */
+[
 	'toc_html' => $toc_html,
 ] = $args;
 

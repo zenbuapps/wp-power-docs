@@ -51,7 +51,6 @@ final class Loader {
 	 *
 	 * @param \Elementor\Widgets_Manager $widgets_manager widgets_manager
 	 * @return void
-	 * @phpstan-ignore-next-line
 	 */
 	public function register_widget( $widgets_manager ): void {
 		foreach ( $this->widget_classes as $widget_class ) {

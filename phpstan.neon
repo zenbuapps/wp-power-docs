@@ -4,12 +4,7 @@ parameters:
 		- plugin.php
 		- inc/
 	ignoreErrors:
-		- '#Access to constant .* on an unknown class#'
-		- '#Constant .* not found#'
-		- '#Function .* not found#'
 		- '#Cannot cast mixed to .*#'
-		- '#Using nullsafe method call on non-nullable type .*#'
-		- '#Call to function is_numeric\(\) with .*#'
 	excludePaths:
 		- js/*
 		- vendor/*
@@ -19,4 +14,5 @@ parameters:
 		- vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
 		- ../powerhouse/plugin.php
 		- ../powerhouse/vendor/autoload.php
-		- ../elementor/elementor.php
+		- vendor/php-stubs/wp-cli-stubs/wp-cli-stubs.php
+		- vendor/arts/elementor-stubs/elementor-stubs.php

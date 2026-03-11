@@ -5,7 +5,7 @@
 
 use J7\Powerhouse\Plugin as Powerhouse;
 use J7\PowerDocs\Domains\Doc\CPT;
-use J7\Powerhouse\Domains\Post\Utils as PostUtils;
+use J7\Powerhouse\Domains\Post\Utils\CRUD as PostUtils;
 
 global $post;
 $top_parent_id    = PostUtils::get_top_post_id($post->ID);
@@ -42,7 +42,7 @@ printf(
 	'
 <h6 class="text-lg md:text-2xl text-content mb-6">所有與 %1$s 相關的結果</h6>
 ',
-	$search
+	(string) $search
 );
 
 echo '<div id="pc-search-results">';

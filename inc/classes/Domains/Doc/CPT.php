@@ -5,7 +5,7 @@ declare( strict_types=1 );
 namespace J7\PowerDocs\Domains\Doc;
 
 use J7\PowerDocs\Plugin;
-use J7\Powerhouse\Domains\Post\Utils as PostUtils;
+use J7\Powerhouse\Domains\Post\Utils\CRUD as PostUtils;
 
 /**
  * Class CPT
@@ -117,9 +117,9 @@ final class CPT {
 	/**
 	 * 處理文章儲存後的動作
 	 *
-	 * @param int     $post_id Post ID
-	 * @param WP_Post $post Post object
-	 * @param bool    $update Whether this is an existing post being updated
+	 * @param int      $post_id Post ID
+	 * @param \WP_Post $post Post object
+	 * @param bool     $update Whether this is an existing post being updated
 	 */
 	public function delete_transient( $post_id, $post, $update ): void {
 		// 避免自動儲存
@@ -136,9 +136,9 @@ final class CPT {
 	/**
 	 * 如果儲存時，editor 是 power-editor，則要清除 elementor 相關資料
 	 *
-	 * @param int     $post_id Post ID
-	 * @param WP_Post $post Post object
-	 * @param bool    $update Whether this is an existing post being updated
+	 * @param int      $post_id Post ID
+	 * @param \WP_Post $post Post object
+	 * @param bool     $update Whether this is an existing post being updated
 	 */
 	public static function delete_elementor_data( $post_id, $post, $update ): void {
 		// 避免自動儲存
@@ -148,11 +148,12 @@ final class CPT {
 		$editor = \get_post_meta( $post_id, 'editor', true );
 
 		if ( $editor === 'power-editor' ) {
+			/** @var array<string, mixed> $post_meta */
 			$post_meta = \get_post_meta( $post_id );
 
 			foreach ( $post_meta as $key => $value ) {
-				if ( strpos( $key, '_elementor_' ) !== false ) {
-					\delete_post_meta( $post_id, $key );
+				if ( strpos( (string) $key, '_elementor_' ) !== false ) {
+					\delete_post_meta( $post_id, (string) $key );
 				}
 			}
 		}

@@ -76,7 +76,7 @@ class TOCGenerator {
 	 * 解析 HTML 內容中的標題標籤，生成階層式目錄結構
 	 * 會自動為標題添加錨點 ID，並生成對應的目錄連結
 	 *
-	 * @param array $levels 要包含的標題層級 (預設 h2-h6)
+	 * @param array<int> $levels 要包含的標題層級 (預設 h2-h6)
 	 * @return string 生成的目錄 HTML
 	 * @throws \Exception 如果生成目錄時發生錯誤
 	 */
@@ -85,7 +85,7 @@ class TOCGenerator {
 			// 構建 XPath 查詢
 			$heading_query = '//h' . implode('|//h', $levels);
 			/**
-			 * @var DOMNodeList $heading_elements
+			 * @var \DOMNodeList<\DOMElement> $heading_elements
 			 * DOMNodeList 物件有以下特性：
 			 * 1. 只有 length 屬性可用於檢查是否有標題
 			 * 2. 實現了 Traversable 介面，可用於 foreach 遍歷
@@ -100,7 +100,7 @@ class TOCGenerator {
 			$this->toc = '<ul class="pc-toc list-none pl-0">' . PHP_EOL;
 
 			foreach ($heading_elements as $heading) {
-				/** @var DOMElement $heading */
+				/** @var \DOMElement $heading */
 				// 由於 nodeName 和 textContent 是 DOM 原生屬性，我們只能在賦值時改名
 				$level = (int) substr($heading->nodeName, 1); // phpcs:ignore
 				$text  = trim($heading->textContent); // phpcs:ignore

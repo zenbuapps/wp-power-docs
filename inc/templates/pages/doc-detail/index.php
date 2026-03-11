@@ -10,7 +10,7 @@ use J7\PowerDocs\Helper\TOCGenerator;
 
 global $post;
 
-$post_content = get_post_field('post_content', $post->ID);
+$post_content = $post->post_content;
 
 $toc          = new TOCGenerator($post_content);
 $toc_html     = $toc->get_toc_html();

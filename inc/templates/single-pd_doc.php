@@ -5,7 +5,7 @@
 
 use J7\PowerDocs\Plugin;
 use J7\PowerDocs\Domains\Doc\Access;
-use J7\Powerhouse\Domains\Post\Utils as PostUtils;
+use J7\Powerhouse\Domains\Post\Utils\CRUD as PostUtils;
 use J7\Powerhouse\Theme\Core\FrontEnd as Theme;
 
 global $post;

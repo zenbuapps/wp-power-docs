@@ -71,13 +71,14 @@ final class Card extends \Elementor\Widget_Base {
 	 * @return void
 	 */
 	protected function render(): void {
+		/** @var array<string, mixed> $settings */
 		$settings = $this->get_settings_for_display();
 
-		if ( !$settings['post_id'] ) {
+		if ( !isset($settings['post_id']) || !$settings['post_id'] ) {
 			echo \esc_html__( '請選擇要顯示的子文章', 'power_docs' );
 			return;
 		}
-		$post = \get_post( $settings['post_id'] );
+		$post = \get_post( (int) $settings['post_id'] );
 
 		Powerhouse::load_template(
 			'card',

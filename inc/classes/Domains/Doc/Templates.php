@@ -5,7 +5,7 @@ declare( strict_types=1 );
 namespace J7\PowerDocs\Domains\Doc;
 
 use J7\PowerDocs\Plugin;
-use J7\Powerhouse\Domains\Post\Utils as PostUtils;
+use J7\Powerhouse\Domains\Post\Utils\CRUD as PostUtils;
 
 /**
  * 知識庫模板

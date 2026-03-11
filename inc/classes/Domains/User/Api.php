@@ -33,7 +33,6 @@ final class Api extends ApiBase {
 	 * @param \WP_REST_Request $request Request.
 	 *
 	 * @return \WP_REST_Response
-	 * @phpstan-ignore-next-line
 	 */
 	public function get_users_callback( $request ): \WP_REST_Response {
 		$params = $request->get_query_params();
@@ -65,7 +64,7 @@ final class Api extends ApiBase {
 			if ($granted_docs) {
 				$im_table_name = $wpdb->prefix . 'ph_access_itemmeta';
 				$from_sql     .= " LEFT JOIN {$im_table_name} im ON u.ID = im.user_id";
-				$placeholders  = implode(',', array_map(fn( $id ) => "'{$id}'", $granted_docs));
+				$placeholders  = implode(',', array_map(fn( $id ) => "'" . (string) $id . "'", $granted_docs));
 				$where_sql    .= " AND im.meta_key = 'expire_date' AND im.post_id IN ({$placeholders}) ";
 			}
 		}
@@ -73,11 +72,13 @@ final class Api extends ApiBase {
 		// Meta 查詢
 		// TODO 可以再優化更複雜的查詢
 		if (isset($params['meta_key'])) {
+			$meta_key   = (string) $params['meta_key'];
 			$from_sql  .= " LEFT JOIN {$wpdb->usermeta} um ON u.ID = um.user_id";
-			$where_sql .= " AND um.meta_key = {$params['meta_key']} ";
+			$where_sql .= " AND um.meta_key = {$meta_key} ";
 
 			if (isset($params['meta_value'])) {
-				$where_sql .= " AND um.meta_value = {$params['meta_value']} ";
+				$meta_value = (string) $params['meta_value'];
+				$where_sql .= " AND um.meta_value = {$meta_value} ";
 			}
 		}
 
