@@ -214,4 +214,59 @@ test.describe('[E2E] 安全性測試', () => {
 			}
 		})
 	})
+
+	test.describe('前台搜尋注入防護', () => {
+		test('前台搜尋 XSS script — 不造成腳本注入', async ({ page }) => {
+			const { data: freeDoc } = await wpGet<any>(opts, `${API.posts}/${ids.freeDocId}`)
+			test.skip(!freeDoc?.slug, '無法取得免費知識庫 slug')
+
+			let alertFired = false
+			page.on('dialog', async (dialog) => {
+				alertFired = true
+				await dialog.dismiss()
+			})
+
+			const response = await page.goto(
+				`/pd_doc/${freeDoc.slug}/?search=${encodeURIComponent('<script>alert("XSS")</script>')}`,
+				{ waitUntil: 'domcontentloaded', timeout: 15_000 },
+			)
+
+			expect(response?.status()).toBeLessThan(500)
+			expect(alertFired).toBe(false)
+
+			const bodyHtml = await page.content()
+			expect(bodyHtml).not.toContain('<script>alert("XSS")</script>')
+		})
+
+		test('前台搜尋 SQL injection — 不造成伺服器錯誤', async ({ page }) => {
+			const { data: freeDoc } = await wpGet<any>(opts, `${API.posts}/${ids.freeDocId}`)
+			test.skip(!freeDoc?.slug, '無法取得免費知識庫 slug')
+
+			const response = await page.goto(
+				`/pd_doc/${freeDoc.slug}/?search=${encodeURIComponent("' OR 1=1 --")}`,
+				{ waitUntil: 'domcontentloaded', timeout: 15_000 },
+			)
+
+			expect(response?.status()).toBeLessThan(500)
+		})
+
+		test('前台搜尋 img onerror — 不造成腳本注入', async ({ page }) => {
+			const { data: freeDoc } = await wpGet<any>(opts, `${API.posts}/${ids.freeDocId}`)
+			test.skip(!freeDoc?.slug, '無法取得免費知識庫 slug')
+
+			let alertFired = false
+			page.on('dialog', async (dialog) => {
+				alertFired = true
+				await dialog.dismiss()
+			})
+
+			const response = await page.goto(
+				`/pd_doc/${freeDoc.slug}/?search=${encodeURIComponent('<img onerror="alert(1)" src=x>')}`,
+				{ waitUntil: 'domcontentloaded', timeout: 15_000 },
+			)
+
+			expect(response?.status()).toBeLessThan(500)
+			expect(alertFired).toBe(false)
+		})
+	})
 })
