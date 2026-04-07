@@ -15,7 +15,7 @@
 
 **Power Docs** is a WordPress plugin for building rich knowledge-base pages and managing subscriber-based content monetization. It registers a hierarchical custom post type (`pd_doc`), integrates with WooCommerce for purchase-gated access, and provides a React/TypeScript admin panel built with Refine.dev.
 
-This plugin depends on a sister plugin called **Powerhouse** (`j7-dev/wp-powerhouse`) which provides shared utilities, REST API infrastructure, Limit/Access models, and the frontend toolkit (`antd-toolkit`).
+This plugin depends on a sister plugin called **Powerhouse** (`p9-cloud/wp-powerhouse`) which provides shared utilities, REST API infrastructure, Limit/Access models, and the frontend toolkit (`antd-toolkit`).
 
 ---
 

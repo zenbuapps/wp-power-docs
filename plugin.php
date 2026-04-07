@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       Power Docs | WordPress 最好的知識變現套件
- * Plugin URI:        https://github.com/j7-dev/power-docs
+ * Plugin URI:        https://github.com/p9-cloud/power-docs
  * Description:       輕鬆做出豐富的知識庫頁面，以及輕鬆管理你的知識訂閱客戶
  * Version:           1.2.7
  * Requires at least: 5.7
@@ -59,7 +59,7 @@ final class Plugin {
 			[
 				'name'     => 'Powerhouse',
 				'slug'     => 'powerhouse',
-				'source'   => 'https://github.com/j7-dev/wp-powerhouse/releases/latest/download/powerhouse.zip',
+				'source'   => 'https://github.com/p9-cloud/wp-powerhouse/releases/latest/download/powerhouse.zip',
 				'version'  => '3.3.11',
 				'required' => true,
 			],
@@ -68,7 +68,7 @@ final class Plugin {
 		$this->init(
 			[
 				'app_name'    => 'Power Docs',
-				'github_repo' => 'https://github.com/j7-dev/wp-power-docs',
+				'github_repo' => 'https://github.com/p9-cloud/wp-power-docs',
 				'callback'    => [ Bootstrap::class, 'instance' ],
 			]
 		);
