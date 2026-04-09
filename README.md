@@ -34,7 +34,7 @@
 | PHP | 8.0+ |
 | WordPress | 5.7+ |
 | WooCommerce | 7.6.0+ |
-| [Powerhouse](https://github.com/p9-cloud/wp-powerhouse) | 3.3.11+ |
+| [Powerhouse](https://github.com/zenbuapps/wp-powerhouse) | 3.3.11+ |
 
 ---
 
@@ -42,7 +42,7 @@
 
 ### 方法一：從 GitHub Releases 下載
 
-1. 前往 [Releases 頁面](https://github.com/p9-cloud/wp-power-docs/releases/latest)
+1. 前往 [Releases 頁面](https://github.com/zenbuapps/wp-power-docs/releases/latest)
 2. 下載 `power-docs.zip`
 3. 在 WordPress 後台 → 外掛 → 安裝外掛 → 上傳外掛
 

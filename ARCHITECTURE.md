@@ -273,7 +273,7 @@ lodash-es
 |---|---|---|
 | **Bunny.net Stream** | Video hosting for doc content | Powerhouse Settings (`bunny_library_id`, `bunny_cdn_hostname`, `bunny_stream_api_key`) |
 | **WooCommerce** | Purchase gating + access grants | WordPress site |
-| **Powerhouse** | REST API, Access table, Theme system | `p9-cloud/wp-powerhouse` plugin |
+| **Powerhouse** | REST API, Access table, Theme system | `zenbuapps/wp-powerhouse` plugin |
 
 ---
 
