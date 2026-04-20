@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name:       Power Docs | WordPress 最好的知識變現套件
  * Plugin URI:        https://github.com/zenbuapps/power-docs
@@ -15,7 +16,7 @@
  * Tags:              document, knowledge,knowledge management system, power-docs
  */
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace J7\PowerDocs;
 
@@ -23,13 +24,14 @@ if (!defined('ABSPATH')) {
 	exit; // Exit if accessed directly
 }
 
-if ( \class_exists( 'J7\PowerDocs\Plugin' ) ) {
+if (\class_exists('J7\PowerDocs\Plugin')) {
 	return;
 }
 require_once __DIR__ . '/vendor/autoload.php';
 
 /** Class Plugin */
-final class Plugin {
+final class Plugin
+{
 	use \J7\WpUtils\Traits\PluginTrait;
 	use \J7\WpUtils\Traits\SingletonTrait;
 
@@ -43,11 +45,12 @@ final class Plugin {
 	/**
 	 * Constructor
 	 */
-	public function __construct() {
+	public function __construct()
+	{
 
 		self::$is_local = 'local' === \wp_get_environment_type();
 
-		self::$template_page_names = [ 'doc-landing', 'doc-detail', 'doc-search' ];
+		self::$template_page_names = ['doc-landing', 'doc-detail', 'doc-search'];
 
 		$this->required_plugins = [
 			[
@@ -60,7 +63,7 @@ final class Plugin {
 				'name'     => 'Powerhouse',
 				'slug'     => 'powerhouse',
 				'source'   => 'https://github.com/zenbuapps/wp-powerhouse/releases/latest/download/powerhouse.zip',
-				'version'  => '3.3.11',
+				'version'  => '3.3.50',
 				'required' => true,
 			],
 		];
@@ -69,7 +72,7 @@ final class Plugin {
 			[
 				'app_name'    => 'Power Docs',
 				'github_repo' => 'https://github.com/zenbuapps/wp-power-docs',
-				'callback'    => [ Bootstrap::class, 'instance' ],
+				'callback'    => [Bootstrap::class, 'instance'],
 			]
 		);
 	}
