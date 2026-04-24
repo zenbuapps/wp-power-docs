@@ -20,7 +20,22 @@ on:
   workflow_dispatch:
 
 jobs:
+  # ── LOCAL-ONLY guard：僅允許 act 本地執行，阻擋 GitHub 線上跑 ──
+  local-only:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 確認為 act 本地環境
+        env:
+          ACT_ENV: ${{ env.ACT }}
+        run: |
+          if [ "$ACT_ENV" != "true" ]; then
+            echo "::error::act-test.yml 僅供 act 本地執行，禁止在 GitHub Actions 線上運行"
+            exit 1
+          fi
+          echo "✅ 確認為 act 本地環境"
+
   integration-tests:
+    needs: local-only
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -29,15 +44,16 @@ jobs:
       phpunit_ok: ${{ steps.mock_phpunit.outcome }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
+
+      - name: 設定 pnpm
+        uses: pnpm/action-setup@v4
 
       - name: 設定 Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: 設定 pnpm
-        uses: pnpm/action-setup@v4
+          cache: 'pnpm'
 
       - name: 安裝 Node 依賴
         run: pnpm install
@@ -89,15 +105,16 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
+
+      - name: 設定 pnpm
+        uses: pnpm/action-setup@v4
 
       - name: 設定 Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: 設定 pnpm
-        uses: pnpm/action-setup@v4
+          cache: 'pnpm'
 
       - name: 安裝 Node 依賴
         run: pnpm install

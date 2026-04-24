@@ -4,6 +4,10 @@ on:
   issues:
     types: [opened, edited]
 
+concurrency:
+  group: issue-expansion-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
 jobs:
   expand-requirements:
     # 粗篩：body 包含 @claude 才進 job，精確關鍵字由 step 1 的 grep 判斷
@@ -46,8 +50,10 @@ jobs:
         if: steps.check_keyword.outputs.matched == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          ISSUE_NUM: ${{ github.event.issue.number }}
         run: |
-          gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/reactions \
+          gh api "repos/${REPO}/issues/${ISSUE_NUM}/reactions" \
             -f content=eyes --silent
 
       # ── 3. 重複展開防護 ─────────────────────────────────
@@ -56,9 +62,11 @@ jobs:
         id: guard
         env:
           GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          ISSUE_NUM: ${{ github.event.issue.number }}
         run: |
           MARKER="<!-- issue-creator-expanded -->"
-          EXISTING=$(gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments \
+          EXISTING=$(gh api "repos/${REPO}/issues/${ISSUE_NUM}/comments" \
             --paginate --jq '.[].body' 2>/dev/null | grep -c "$MARKER" || echo "0")
           if [ "$EXISTING" -gt "0" ]; then
             echo "already_expanded=true" >> $GITHUB_OUTPUT
@@ -71,7 +79,7 @@ jobs:
       # ── 4. Checkout（需要讀 specs 目錄）──────────────────
       - name: Checkout repository
         if: steps.check_keyword.outputs.matched == 'true' && steps.guard.outputs.already_expanded != 'true'
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
@@ -88,8 +96,8 @@ jobs:
         id: fetch_issue
         env:
           GH_TOKEN: ${{ github.token }}
+          ISSUE_NUM: ${{ github.event.issue.number }}
         run: |
-          ISSUE_NUM="${{ github.event.issue.number }}"
           ISSUE_TITLE=$(gh issue view "$ISSUE_NUM" --json title --jq '.title' 2>/dev/null || echo "")
           ISSUE_BODY=$(gh issue view "$ISSUE_NUM" --json body --jq '.body' 2>/dev/null || echo "")
           {
@@ -104,8 +112,10 @@ jobs:
       # ── 7. 組合 Prompt ──────────────────────────────────
       - name: 組合 Issue 展開 Prompt
         if: steps.check_keyword.outputs.matched == 'true' && steps.guard.outputs.already_expanded != 'true'
+        env:
+          ISSUE_NUM: ${{ steps.fetch_issue.outputs.issue_num }}
+          MODE: ${{ steps.check_keyword.outputs.mode }}
         run: |
-          ISSUE_NUM="${{ steps.fetch_issue.outputs.issue_num }}"
           {
             echo 'EXPAND_PROMPT<<GHEOF'
             echo "$ISSUE_CONTENT"
@@ -116,7 +126,6 @@ jobs:
             echo "上方是用戶在 Issue #${ISSUE_NUM} 提出的粗略需求。"
             echo ""
             echo "### 任務"
-            MODE="${{ steps.check_keyword.outputs.mode }}"
             if [ "$MODE" = "dev" ]; then
               echo "1. 使用 /wp-workflows:issue-creator skill（DEV 開發者模式）將上方粗略需求展開為結構化的完整需求文件"
               echo "   ⚠️ 重要：此為 DEV 模式，產出內容面向開發者，需包含技術細節、影響檔案範圍、API 規格等"
@@ -149,81 +158,12 @@ jobs:
             echo 'GHEOF'
           } >> $GITHUB_ENV
 
-      # ── 8. Run Claude Code（3 次重試）─────────────────────
-      - name: "Run Claude Code (attempt 1/3)"
-        id: claude_attempt_1
+      # ── 8. Run Claude Code（透過 composite 做 3 次重試）────
+      - name: "Run Claude Code (with retry)"
         if: steps.check_keyword.outputs.matched == 'true' && steps.guard.outputs.already_expanded != 'true'
-        continue-on-error: true
-        uses: anthropics/claude-code-action@v1
+        uses: ./.github/actions/claude-retry
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          settings: .claude/settings.json
-          plugin_marketplaces: |
-            https://github.com/j7-dev/wp-workflows.git
-          plugins: |
-            wp-workflows@wp-workflows
           prompt: ${{ env.EXPAND_PROMPT }}
-          claude_args: |
-            --dangerously-skip-permissions
-            --max-turns 50
-            --model opus
-
-      - name: "等待重試 (attempt 1 failed)"
-        if: >-
-          steps.check_keyword.outputs.matched == 'true' &&
-          steps.guard.outputs.already_expanded != 'true' &&
-          steps.claude_attempt_1.outcome == 'failure'
-        run: |
-          echo "⚠️ 第 1 次嘗試失敗，等待 30 秒後重試..."
-          sleep 30
-
-      - name: "Run Claude Code (attempt 2/3)"
-        id: claude_attempt_2
-        if: >-
-          steps.check_keyword.outputs.matched == 'true' &&
-          steps.guard.outputs.already_expanded != 'true' &&
-          steps.claude_attempt_1.outcome == 'failure'
-        continue-on-error: true
-        uses: anthropics/claude-code-action@v1
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          settings: .claude/settings.json
-          plugin_marketplaces: |
-            https://github.com/j7-dev/wp-workflows.git
-          plugins: |
-            wp-workflows@wp-workflows
-          prompt: ${{ env.EXPAND_PROMPT }}
-          claude_args: |
-            --dangerously-skip-permissions
-            --max-turns 50
-            --model opus
-
-      - name: "等待重試 (attempt 2 failed)"
-        if: >-
-          steps.check_keyword.outputs.matched == 'true' &&
-          steps.guard.outputs.already_expanded != 'true' &&
-          steps.claude_attempt_1.outcome == 'failure' &&
-          steps.claude_attempt_2.outcome == 'failure'
-        run: |
-          echo "⚠️ 第 2 次嘗試失敗，等待 60 秒後重試..."
-          sleep 60
-
-      - name: "Run Claude Code (attempt 3/3 - final)"
-        if: >-
-          steps.check_keyword.outputs.matched == 'true' &&
-          steps.guard.outputs.already_expanded != 'true' &&
-          steps.claude_attempt_1.outcome == 'failure' &&
-          steps.claude_attempt_2.outcome == 'failure'
-        uses: anthropics/claude-code-action@v1
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          settings: .claude/settings.json
-          plugin_marketplaces: |
-            https://github.com/j7-dev/wp-workflows.git
-          plugins: |
-            wp-workflows@wp-workflows
-          prompt: ${{ env.EXPAND_PROMPT }}
-          claude_args: |
-            --dangerously-skip-permissions
-            --max-turns 50
-            --model opus
+          max_turns: '50'
+          model: opus

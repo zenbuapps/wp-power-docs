@@ -77,10 +77,8 @@ jobs:
           ISSUE_URL: ${{ github.event.comment.issue_url }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          # 取得 issue number
-          if [ "$EVENT_NAME" = "issues" ]; then
-            ISSUE_NUM="$ISSUE_NUMBER"
-          elif [ "$EVENT_NAME" = "issue_comment" ]; then
+          # 取得 issue number（on: 觸發事件只有 issue_comment / pull_request_review_comment / pull_request_review）
+          if [ "$EVENT_NAME" = "issue_comment" ]; then
             ISSUE_NUM=$(echo "$ISSUE_URL" | grep -oE '[0-9]+$' || echo "")
             if [ -z "$ISSUE_NUM" ]; then
               ISSUE_NUM="$ISSUE_NUMBER"
@@ -132,12 +130,11 @@ jobs:
         id: parse_agent
         env:
           COMMENT_BODY: ${{ github.event.comment.body }}
-          ISSUE_BODY: ${{ github.event.issue.body }}
           REVIEW_BODY: ${{ github.event.review.body }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
-          if [ "${{ github.event_name }}" = "issues" ]; then
-            COMMENT="$ISSUE_BODY"
-          elif [ "${{ github.event_name }}" = "pull_request_review" ]; then
+          # on: 觸發事件只有 issue_comment / pull_request_review_comment / pull_request_review
+          if [ "$EVENT_NAME" = "pull_request_review" ]; then
             COMMENT="$REVIEW_BODY"
           else
             COMMENT="$COMMENT_BODY"
@@ -534,13 +531,14 @@ jobs:
           git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
 
       # ── 測試環境設置 ─────────────────────────────────
+      - name: 設定 pnpm
+        uses: pnpm/action-setup@v4
+
       - name: 設定 Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: 設定 pnpm
-        uses: pnpm/action-setup@v4
+          cache: 'pnpm'
 
       - name: 安裝 Node 依賴
         run: pnpm install
@@ -1156,8 +1154,9 @@ jobs:
           BUNNY_STORAGE_ZONE: ${{ secrets.BUNNY_STORAGE_ZONE }}
           BUNNY_STORAGE_PASSWORD: ${{ secrets.BUNNY_STORAGE_PASSWORD }}
           BUNNY_CDN_URL: ${{ secrets.BUNNY_CDN_URL }}
+          BRANCH_REF: ${{ github.ref_name }}
         run: |
-          BRANCH_DIR=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9._-]/-/g')
+          BRANCH_DIR=$(echo "$BRANCH_REF" | sed 's/[^a-zA-Z0-9._-]/-/g')
           bash .github/scripts/upload-to-bunny.sh /tmp/smoke-media "ci/${BRANCH_DIR}/smoke-test"
 
       - name: 上傳 Smoke Test 媒體 Artifact (備份)
