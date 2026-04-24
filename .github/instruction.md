@@ -13,8 +13,9 @@
 ├── workflows/
 │   ├── pipe.yml           # 主 pipeline（claude job + integration-tests job）
 │   ├── pipe.md            # pipeline 中文規格書
-│   ├── issue.yml          # Issue 需求展開（@claude 展開/探討/dev 觸發）
-│   └── act-test.yml       # 本機 act 結構驗證用（不發布）
+│   └── issue.yml          # Issue 需求展開（@claude 展開/探討/dev 觸發）
+├── act/
+│   └── test.yml           # 本機 act 結構驗證用（不發布，放此處避免線上誤觸發）
 ├── actions/
 │   └── claude-retry/      # claude-code-action@v1 的 3 次重試包裝（30s / 60s backoff）
 │       └── action.yml
@@ -136,7 +137,7 @@ test_cycle_1 (失敗) → claude_fix_1 → test_cycle_2 (失敗) → claude_fix_
 
 ```powershell
 mkdir -p "$env:TEMP/act-artifacts"
-act workflow_dispatch -W .github/workflows/act-test.yml `
+act workflow_dispatch -W .github/act/test.yml `
   --container-architecture linux/amd64 `
   -P ubuntu-latest=catthehacker/ubuntu:act-latest `
   --container-options "--privileged" `

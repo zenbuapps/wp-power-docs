@@ -1,7 +1,7 @@
 # 本地 act 測試用 — 驗證多 job 結構（job 依賴鏈 + artifact 傳遞 + build）
 # Windows 用法（需先建立 artifact 目錄）:
 #   mkdir -p "$env:TEMP/act-artifacts"
-#   act workflow_dispatch -W .github/workflows/act-test.yml \
+#   act workflow_dispatch -W .github/act/test.yml \
 #     --container-architecture linux/amd64 \
 #     -P ubuntu-latest=catthehacker/ubuntu:act-latest \
 #     --container-options "--privileged" \
@@ -29,7 +29,7 @@ jobs:
           ACT_ENV: ${{ env.ACT }}
         run: |
           if [ "$ACT_ENV" != "true" ]; then
-            echo "::error::act-test.yml 僅供 act 本地執行，禁止在 GitHub Actions 線上運行"
+            echo "::error::.github/act/test.yml 僅供 act 本地執行，禁止在 GitHub Actions 線上運行"
             exit 1
           fi
           echo "✅ 確認為 act 本地環境"
@@ -48,6 +48,8 @@ jobs:
 
       - name: 設定 pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
       - name: 設定 Node.js
         uses: actions/setup-node@v4
@@ -109,6 +111,8 @@ jobs:
 
       - name: 設定 pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
       - name: 設定 Node.js
         uses: actions/setup-node@v4
