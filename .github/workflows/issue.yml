@@ -67,9 +67,12 @@ jobs:
           ISSUE_NUM: ${{ github.event.issue.number }}
         run: |
           MARKER="<!-- issue-creator-expanded -->"
+          # grep -c 無匹配時 exit 1，需用 || true 而非 || echo "0"
+          # 後者在「無匹配」分支會產生 "0\n0" 多行字串，導致 [ -gt ] 噴 integer expression expected
           EXISTING=$(gh api "repos/${REPO}/issues/${ISSUE_NUM}/comments" \
-            --paginate --jq '.[].body' 2>/dev/null | grep -c "$MARKER" || echo "0")
-          if [ "$EXISTING" -gt "0" ]; then
+            --paginate --jq '.[].body' 2>/dev/null | grep -c "$MARKER" || true)
+          EXISTING=${EXISTING:-0}
+          if [ "$EXISTING" -gt 0 ]; then
             echo "already_expanded=true" >> $GITHUB_OUTPUT
             echo "⚠️ 此 Issue 已經展開過需求，跳過重複執行"
           else
