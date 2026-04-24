@@ -226,6 +226,7 @@ jobs:
       - name: "Stage 1: Clarifier"
         id: clarifier
         if: env.PR_MODE != 'true'
+        continue-on-error: true
         uses: ./.github/actions/claude-retry
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -239,6 +240,7 @@ jobs:
 
       - name: 偵測 Specs 變更
         id: detect_specs
+        if: ${{ !cancelled() && env.PR_MODE != 'true' }}
         run: |
           # Clarifier 是否成功（由 composite action 彙整）
           CLARIFIER_OK="${{ steps.clarifier.outputs.success }}"
@@ -331,6 +333,7 @@ jobs:
       - name: "Stage 2: Planner"
         id: planner
         if: steps.detect_specs.outputs.specs_available == 'true' && env.PIPELINE_MODE == 'true'
+        continue-on-error: true
         uses: ./.github/actions/claude-retry
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -369,6 +372,7 @@ jobs:
       - name: "Stage 3: TDD Coordinator"
         id: tdd
         if: steps.detect_planner.outputs.planner_ok == 'true'
+        continue-on-error: true
         uses: ./.github/actions/claude-retry
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -382,6 +386,7 @@ jobs:
 
       - name: 檢查 Claude 結果與程式碼變更
         id: check_result
+        if: ${{ !cancelled() }}
         run: |
           # Stage 1: Clarifier 成功檢查（由 composite action 彙整）
           CLARIFIER_OK="${{ steps.clarifier.outputs.success }}"
